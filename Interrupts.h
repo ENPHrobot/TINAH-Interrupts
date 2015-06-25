@@ -1,7 +1,6 @@
 #ifndef Interrupts_h
 #define Interrupts_h
 
-#include <phys253.h>
 #include <avr/interrupt.h>
 
 class Interrupts

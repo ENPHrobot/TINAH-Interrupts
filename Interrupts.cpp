@@ -1,5 +1,4 @@
 #include <avr/interrupt.h>
-#include <phys253.h>
 #include <Interrupts.h>
 
 // Interrupts class constructor
