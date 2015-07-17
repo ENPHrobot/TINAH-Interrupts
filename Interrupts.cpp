@@ -13,7 +13,7 @@ ISR(INT0_vect) { (*isr0)(); }
 ISR(INT1_vect) { (*isr1)(); }
 ISR(INT2_vect) { (*isr2)(); }
 ISR(INT3_vect) { (*isr3)(); }
-ISR(TIMER3_COMPA_vect) { (*timer)(); }
+ISR(TIMER1_COMPA_vect) { (*timer)(); }
 
 /*  Enables an external interrupt pin
 INTX: Which interrupt should be configured?
@@ -76,10 +76,11 @@ void attachISR(unsigned int INTX, void (*f)())
 /* The interrupt routine that is called is ISR(TIMER1_COMPA_vect)             */
 /* Valid interrupt frequencies: 1Hz to 65535 Hz                               */
 /* If the frequency is impossible to achieve, no interrupt will be configured */
+/* Timer 1 affects Motor 1 */
 void attachTimerInterrupt(unsigned int interruptFrequencyHz, void (*f)())
 {
     const uint32_t timerOverflowHz[] = {F_CPU / 1, F_CPU / 8, F_CPU / 64, F_CPU / 256, F_CPU / 1024};
-    for (uint8_t i = 0; i < 5; i++)
+    for (uint8_t i = 4; i < 5; i++)
     {
         /* The number of 16-bit timer overflows needed to obtain the desired frequency */
         const uint32_t overflowsNeeded = timerOverflowHz[i] / interruptFrequencyHz;
@@ -87,12 +88,12 @@ void attachTimerInterrupt(unsigned int interruptFrequencyHz, void (*f)())
         if (overflowsNeeded <= 0xFFFFU)
         {
             cli();
-            TCCR3A = 0;                         /* Clear current comparison value */
-            TCNT3  = 0;                         /* Clear current timer value      */
-            OCR3A  = (uint16_t)overflowsNeeded; /* Set timer comparison value     */
-            TCCR3B = (1 << WGM12);              /* Set timer comparison mode      */
-            TCCR3B |= i + 1;                    /* Set timer prescaler value      */
-            ETIMSK |= (1 << OCIE3A);            /* Set timer interrupt enable     */
+            TCCR1A = 0;                         /* Clear current comparison value */
+            TCNT1  = 0;                         /* Clear current timer value      */
+            OCR1A  = (uint16_t)overflowsNeeded; /* Set timer comparison value     */
+            TCCR1B = (1 << WGM12);              /* Set timer comparison mode      */
+            TCCR1B |= i + 1;                    /* Set timer prescaler value      */
+            TIMSK |= (1 << OCIE1A);            /* Set timer interrupt enable     */
             sei();
             timer = f;
             return;
@@ -100,8 +101,8 @@ void attachTimerInterrupt(unsigned int interruptFrequencyHz, void (*f)())
     }
 }
 
-/* Disables the Timer3A comparison interrupt */
+/* Disables the Timer1 comparison interrupt */
 void detachTimerInterrupt()
 {
-    ETIMSK &= ~(1 << OCIE3A);
+	TIMSK &= ~(1 << OCIE1A);
 }
